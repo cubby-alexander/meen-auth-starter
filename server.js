@@ -5,6 +5,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const session = require('express-session');
+const methodOverride = require('method-override');
 
 // Middleware
 mongoose.connect(process.env.DATABASE_URL, {
@@ -13,6 +14,8 @@ mongoose.connect(process.env.DATABASE_URL, {
     useFindAndModify: false,
     useCreateIndex: true,
 });
+
+app.use(methodOverride('_method'));
 
 const db = mongoose.connection;
 db.on('error', (err) => console.log(err.message + ` MongoDB not connected`));
@@ -34,6 +37,26 @@ app.use('/users', userController)
 
 const sessionsController = require('./controllers/sessions');
 app.use('/sessions', sessionsController);
+
+
+// Index
+app.get('/', (req, res) => {
+    if (req.session.currentUser) {
+        res.render('dashboard.ejs', {
+            currentUser: req.session.currentUser
+        })
+    } else {
+        res.render('index.ejs', {
+            currentUser: req.session.currentUser
+        })
+    }
+})
+
+// New
+sessionsController.get('/new', (req, res) => {
+    res.render('sessions/new.ejs');
+})
+
 
 // Listeners
 const PORT = process.env.PORT;

@@ -20,12 +20,23 @@ sessionsRouter.post('/', (req, res) => {
             const passwordMatches = bcrypt.compareSync(req.body.password, foundUser.password);
             if (passwordMatches) {
                 req.session.currentUser = foundUser;
-                res.send(req.session.currentUser);
-                // res.redirect('/');
+                res.redirect('/');
             } else {
                 res.send('Oops! Invalid credentials.')
             }
         }
+    })
+})
+
+sessionsRouter.get('/new', (req, res) => {
+    res.render('sessions/new.ejs', {
+        currentUser: req.session.currentUser,
+    });
+})
+
+sessionsRouter.delete('/', (req, res) => {
+    req.session.destroy((error) => {
+        res.redirect('/')
     })
 })
 
