@@ -4,7 +4,9 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
+const session = require('express-session');
 
+// Middleware
 mongoose.connect(process.env.DATABASE_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -14,9 +16,24 @@ mongoose.connect(process.env.DATABASE_URL, {
 
 const db = mongoose.connection;
 db.on('error', (err) => console.log(err.message + ` MongoDB not connected`));
-db.on('connected', (err) => console.log(`Connection in Mongolia`));
-db.on('disconnected', (err) => console.log(`Political turmoil in Mongolia`));
+db.on('connected', () => console.log(`Connection in Mongolia`));
+db.on('disconnected', () => console.log(`Political turmoil in Mongolia`));
 
+app.use(session({
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: false
+}))
+
+// Body parser middleware
+app.use(express.urlencoded({ extended: true}));
+
+// Routes / Controllers
+const userController = require('./controllers/users');
+app.use('/users', userController)
+
+const sessionsController = require('./controllers/sessions');
+app.use('/sessions', sessionsController);
 
 // Listeners
 const PORT = process.env.PORT;
